@@ -127,12 +127,14 @@ export async function fetchLiveAirQuality(lat: number, lon: number): Promise<Air
 
 export function useAirQuality() {
   const { currentLocation } = useLocation();
-  const { latitude, longitude } = currentLocation.coordinates;
+  const latitude = currentLocation?.coordinates?.latitude ?? 28.6139;
+  const longitude = currentLocation?.coordinates?.longitude ?? 77.209;
+  const locationId = currentLocation?.id || 'loc-delhi-ncr';
 
   const query = useQuery({
-    queryKey: ['air-quality', latitude, longitude, currentLocation.id],
+    queryKey: ['air-quality', latitude, longitude, locationId],
     queryFn: () => fetchLiveAirQuality(latitude, longitude),
-    refetchInterval: 60000, // Refetch every 60s
+    refetchInterval: 60000,
     staleTime: 60000,
   });
 

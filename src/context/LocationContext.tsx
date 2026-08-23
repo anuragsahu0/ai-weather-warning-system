@@ -70,7 +70,6 @@ async function reverseGeocodeCoordinates(latitude: number, longitude: number): P
   country: string;
 }> {
   try {
-    // 1. Try BigDataCloud open reverse geocoding API (Fast, reliable, CORS enabled, no API key needed)
     const response = await fetch(
       `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
     );
@@ -86,29 +85,10 @@ async function reverseGeocodeCoordinates(latitude: number, longitude: number): P
     // Continue to fallback
   }
 
-  try {
-    // 2. Try OpenStreetMap Nominatim reverse geocode fallback
-    const nomResponse = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`
-    );
-    if (nomResponse.ok) {
-      const nomData = await nomResponse.json();
-      const addr = nomData.address || {};
-      const city = addr.city || addr.town || addr.village || addr.suburb || 'Local Sector';
-      const district = addr.county || addr.district || addr.city || 'Local District';
-      const state = addr.state || 'Region';
-      const country = addr.country || 'India';
-      return { city, district, state, country };
-    }
-  } catch {
-    // Continue to generic fallback
-  }
-
-  // Generic fallback if network is offline
   return {
     city: `Sector (${latitude.toFixed(2)}°N, ${longitude.toFixed(2)}°E)`,
-    district: `Lat ${latitude.toFixed(2)}°N`,
-    state: `Lon ${longitude.toFixed(2)}°E`,
+    district: `Sector (${latitude.toFixed(2)}°N)`,
+    state: 'India',
     country: 'India',
   };
 }
@@ -118,7 +98,10 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
     try {
       const saved = localStorage.getItem('error404_saved_locations');
       if (saved) {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0 && parsed[0]?.coordinates?.latitude) {
+          return parsed;
+        }
       }
     } catch {
       // ignore
@@ -130,7 +113,10 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
     try {
       const savedCur = localStorage.getItem('error404_current_location');
       if (savedCur) {
-        return JSON.parse(savedCur);
+        const parsed = JSON.parse(savedCur);
+        if (parsed && parsed.coordinates && typeof parsed.coordinates.latitude === 'number' && parsed.district) {
+          return parsed;
+        }
       }
     } catch {
       // ignore
@@ -143,10 +129,15 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
     'prompt' | 'granted' | 'denied' | 'unsupported'
   >('prompt');
   const [isGpsDetected, setIsGpsDetected] = useState<boolean>(() => {
-    return currentLocation.id === 'loc-detected-gps';
+    return currentLocation?.id === 'loc-detected-gps';
   });
 
+  const safeCurrentLocation: LocationReference = (currentLocation && currentLocation.coordinates)
+    ? currentLocation
+    : PRESET_METEOROLOGICAL_REGIONS[0];
+
   const setCurrentLocation = (loc: LocationReference) => {
+    if (!loc || !loc.coordinates) return;
     setCurrentLocationState(loc);
     setIsGpsDetected(loc.id === 'loc-detected-gps');
     try {
@@ -199,16 +190,13 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
             gridId: gridCode,
           };
 
-          // Update current location and prepend to available locations
-          setCurrentLocationState(detectedLocation);
-          setIsGpsDetected(true);
+          setCurrentLocation(detectedLocation);
 
           setLocations((prev) => {
             const filtered = prev.filter((l) => l.id !== 'loc-detected-gps');
             const updated = [detectedLocation, ...filtered];
             try {
               localStorage.setItem('error404_saved_locations', JSON.stringify(updated));
-              localStorage.setItem('error404_current_location', JSON.stringify(detectedLocation));
             } catch {
               // ignore
             }
@@ -247,7 +235,7 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
   return (
     <LocationContext.Provider
       value={{
-        currentLocation,
+        currentLocation: safeCurrentLocation,
         availableLocations: locations,
         setCurrentLocation,
         selectLocationById,

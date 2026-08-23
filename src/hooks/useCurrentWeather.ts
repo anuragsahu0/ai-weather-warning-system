@@ -22,12 +22,14 @@ export function formatRelativeTime(isoTimestamp?: string | null): string {
 
 export function useCurrentWeather() {
   const { currentLocation } = useLocation();
-  const { latitude, longitude } = currentLocation.coordinates;
+  const latitude = currentLocation?.coordinates?.latitude ?? 28.6139;
+  const longitude = currentLocation?.coordinates?.longitude ?? 77.209;
+  const locationId = currentLocation?.id || 'loc-delhi-ncr';
 
   const query = useQuery({
-    queryKey: ['current-weather', latitude, longitude, currentLocation.id],
-    queryFn: () => fetchCurrentWeather(latitude, longitude, currentLocation.id),
-    refetchInterval: 30000, // Refetch every 30 seconds
+    queryKey: ['current-weather', latitude, longitude, locationId],
+    queryFn: () => fetchCurrentWeather(latitude, longitude, locationId),
+    refetchInterval: 30000,
     staleTime: 60000,
     retry: 2,
   });
