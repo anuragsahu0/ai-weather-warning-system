@@ -1,4 +1,5 @@
 {
+  "name": "ai-weather-warning-system",
   "framework": "vite",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
