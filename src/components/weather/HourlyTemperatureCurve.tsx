@@ -26,21 +26,21 @@ export function HourlyTemperatureCurve() {
   const baseTempC = weather?.temperature ? Math.round(weather.temperature) : 28;
   const baseTempF = Math.round((baseTempC * 9) / 5 + 32);
 
-  // 12-step realistic hourly progression matching screenshot in Fahrenheit (or C)
+  // 12-step realistic hourly progression in Celsius
   const hourlyData: HourlyDataPoint[] = [
-    { timeLabel: 'Now', temp: baseTempF, iconType: 'mist' },
-    { timeLabel: '00:30', temp: baseTempF, iconType: 'cloud' },
-    { timeLabel: '01:30', temp: baseTempF - 1, iconType: 'thunder', rainProb: 34 },
-    { timeLabel: '02:30', temp: baseTempF - 1, iconType: 'thunder', rainProb: 62 },
-    { timeLabel: '03:30', temp: baseTempF - 2, iconType: 'cloud' },
-    { timeLabel: '04:30', temp: baseTempF - 2, iconType: 'cloud' },
-    { timeLabel: '05:30', temp: baseTempF - 2, iconType: 'cloud' },
-    { timeLabel: '05:41', temp: baseTempF - 2, iconType: 'sunrise', isSpecial: true, specialLabel: 'Sunrise' },
-    { timeLabel: '06:30', temp: baseTempF - 2, iconType: 'sun' },
-    { timeLabel: '07:30', temp: baseTempF - 1, iconType: 'rain', rainProb: 43 },
-    { timeLabel: '08:30', temp: baseTempF + 1, iconType: 'thunder', rainProb: 41 },
-    { timeLabel: '09:30', temp: baseTempF + 2, iconType: 'sun', rainProb: 36 },
-    { timeLabel: '10:30', temp: baseTempF + 4, iconType: 'sun', rainProb: 32 },
+    { timeLabel: 'Now', temp: baseTempC, iconType: 'mist' },
+    { timeLabel: '00:30', temp: baseTempC, iconType: 'cloud' },
+    { timeLabel: '01:30', temp: baseTempC - 1, iconType: 'thunder', rainProb: 34 },
+    { timeLabel: '02:30', temp: baseTempC - 1, iconType: 'thunder', rainProb: 62 },
+    { timeLabel: '03:30', temp: baseTempC - 2, iconType: 'cloud' },
+    { timeLabel: '04:30', temp: baseTempC - 2, iconType: 'cloud' },
+    { timeLabel: '05:30', temp: baseTempC - 2, iconType: 'cloud' },
+    { timeLabel: '05:41', temp: baseTempC - 2, iconType: 'sunrise', isSpecial: true, specialLabel: 'Sunrise' },
+    { timeLabel: '06:30', temp: baseTempC - 2, iconType: 'sun' },
+    { timeLabel: '07:30', temp: baseTempC - 1, iconType: 'rain', rainProb: 43 },
+    { timeLabel: '08:30', temp: baseTempC + 1, iconType: 'thunder', rainProb: 41 },
+    { timeLabel: '09:30', temp: baseTempC + 2, iconType: 'sun', rainProb: 36 },
+    { timeLabel: '10:30', temp: baseTempC + 4, iconType: 'sun', rainProb: 32 },
   ];
 
   const minTemp = Math.min(...hourlyData.map((d) => d.temp)) - 2;

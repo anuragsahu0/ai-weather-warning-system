@@ -25,7 +25,7 @@ export function ConsumerWeatherHero({
 }: ConsumerWeatherHeroProps) {
   const { currentLocation } = useLocation();
   const { weather } = useCurrentWeather();
-  const [unit, setUnit] = useState<'F' | 'C'>('F');
+  const [unit, setUnit] = useState<'F' | 'C'>('C');
 
   const tempC = weather?.temperature ? Math.round(weather.temperature) : 28;
   const tempF = Math.round((tempC * 9) / 5 + 32);
