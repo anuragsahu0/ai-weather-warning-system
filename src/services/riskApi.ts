@@ -39,27 +39,35 @@ export async function fetchRiskAssessment(
   const targetGrid = gridId || `GRID_N${Math.round((lat || 28.61) * 100)}_E${Math.round((lon || 77.20) * 100)}`;
 
   return {
-    assessmentId: `risk-eval-${Date.now()}`,
+    riskId: `risk-eval-${Date.now()}`,
     gridId: targetGrid,
+    gridCode: targetGrid,
     hazardType: hazard,
-    targetHorizonMinutes: horizon,
-    evaluatedAt: new Date().toISOString(),
-    rawModelProbability: 0.82,
-    calibratedModelProbability: 0.85,
-    predictiveUncertainty: 0.12,
-    atmosphericSeverityIndex: 0.65,
-    temporalPersistenceScore: 0.74,
-    riskScore: 42,
     riskLevel: 'WATCH',
-    previousRiskLevel: 'WATCH',
-    isDampedTransition: false,
-    alertRecommendation: 'STANDBY',
-    explainability: {
-      dominantFactors: ['Upper-level moisture convergence', 'Elevated CAPE index', 'Low convective inhibition'],
-      formulaWeightsApplied: { probability: 0.4, severity: 0.35, persistence: 0.25 },
-      uncertaintyPenalty: 0.04,
+    riskScore: 42,
+    modelProbability: 0.82,
+    uncertaintyScore: 0.12,
+    validFrom: new Date().toISOString(),
+    validUntil: new Date(Date.now() + horizon * 60000).toISOString(),
+    generatedAt: new Date().toISOString(),
+    status: 'ACTIVE',
+    dataQuality: 'VALID',
+    modelVersion: '2.4.0',
+    fusionVersion: '1.2.0',
+    explanation: {
+      primaryDrivers: [
+        {
+          factorName: 'Moisture Convergence',
+          factorValue: 0.85,
+          relativeContribution: 0.4,
+          direction: 'INCREASES_RISK',
+          explanationText: 'Upper-level moisture convergence',
+        },
+      ],
+      summary: 'Elevated atmospheric convective index and moisture convergence.',
     },
-    dataQualityStatus: 'FRESH',
+    timeline: [],
+    disclaimer: 'Advisory guidance computed by ERROR 404 Nowcasting Engine.',
   };
 }
 
@@ -97,13 +105,13 @@ export async function fetchRiskOverview(): Promise<RiskOverviewSummary> {
   }
 
   return {
-    timestamp: new Date().toISOString(),
-    evaluatedGridsCount: 120,
     activeHotspotsCount: 2,
     highestRiskHazard: 'HEAVY_RAIN',
     highestRiskLevel: 'WATCH',
     peakRiskScore: 42,
     maxModelProbability: 0.85,
-    dataQualityStatus: 'FRESH',
+    dataQualityStatus: 'VALID',
+    evaluatedGridsCount: 120,
+    generatedAt: new Date().toISOString(),
   };
 }

@@ -155,7 +155,7 @@ export function DashboardPage() {
         {/* Right Column (4 of 12 cols = 34% width matching screenshot) */}
         <div className="lg:col-span-4 space-y-6 pt-10 lg:pt-14">
           {/* 1. Air Quality Index Card */}
-          <AirQualityWidget aqi={61} pm25={34.2} pm10={58.6} />
+          <AirQualityWidget />
 
           {/* 2. Health & Activities Card */}
           <HealthActivitiesWidget />
