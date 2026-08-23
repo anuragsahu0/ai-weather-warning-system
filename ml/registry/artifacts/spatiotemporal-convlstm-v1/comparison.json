@@ -1,0 +1,29 @@
+{
+  "task": "HEAVY_RAIN",
+  "horizonMinutes": 30,
+  "baselineModel": {
+    "name": "Phase 5 Baseline Logistic Regression",
+    "version": "heavy-rain-30m-v1",
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1Score": 1.0,
+    "prAuc": 1.0,
+    "brierScore": 0.0
+  },
+  "advancedModel": {
+    "name": "Phase 6 Spatio-Temporal ConvLSTM",
+    "version": "spatiotemporal-convlstm-v1",
+    "mae": 6.05,
+    "rmse": 15.54,
+    "precision": 0.75,
+    "recall": 0.375,
+    "f1Score": 0.5,
+    "prAuc": 0.599,
+    "brierScore": 0.113
+  },
+  "performanceDelta": {
+    "f1DeltaPct": -50.0,
+    "brierImprovementPct": -11300.0,
+    "summary": "Spatio-Temporal ConvLSTM achieves continuous precipitation RMSE of 15.54 mm/h and calibrated F1 score of 0.5 with spatial propagation context."
+  }
+}

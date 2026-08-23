@@ -1,0 +1,60 @@
+{
+  "modelId": "mod-gale-wind-30m-v1",
+  "modelVersion": "gale-wind-30m-v1",
+  "task": "GALE_WIND",
+  "horizonMinutes": 30,
+  "algorithm": "RandomForestClassifier",
+  "datasetVersion": "error404-monsoon-delhi-2024-v1.0",
+  "trainingSamplesCount": 252,
+  "validationSamplesCount": 54,
+  "testSamplesCount": 54,
+  "trainingPeriod": {
+    "start": "2024-07-01T00:00:00Z",
+    "end": "2024-07-11T11:00:00Z"
+  },
+  "testPeriod": {
+    "start": "2024-07-13T18:00:00Z",
+    "end": "2024-07-15T23:00:00Z"
+  },
+  "metrics": {
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1Score": 1.0,
+    "rocAuc": 1.0,
+    "prAuc": 1.0,
+    "brierScore": 0.003,
+    "decisionThreshold": 0.3,
+    "confusionMatrix": {
+      "truePositives": 5,
+      "falsePositives": 0,
+      "trueNegatives": 49,
+      "falseNegatives": 0
+    }
+  },
+  "featureNames": [
+    "temperature",
+    "feelsLike",
+    "humidity",
+    "pressure",
+    "windSpeed",
+    "windDirection",
+    "windGust",
+    "rainfallRate",
+    "cloudCover",
+    "tempDelta30m",
+    "pressureDelta30m",
+    "humidityDelta30m",
+    "windSpeedDelta30m",
+    "pressureTendencyHpaPerHr",
+    "rollingRainAccum30m",
+    "rollingRainAccum60m",
+    "rollingMeanTemp60m",
+    "rollingMaxWind60m",
+    "hourSin",
+    "hourCos",
+    "dayOfYearSin",
+    "dayOfYearCos"
+  ],
+  "createdAt": "2026-08-22T17:47:51.300840Z",
+  "status": "ACTIVE"
+}

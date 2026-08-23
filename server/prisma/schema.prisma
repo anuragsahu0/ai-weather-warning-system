@@ -1,0 +1,766 @@
+// ====================================================================
+// ERROR 404 — Prisma Database Schema
+// AI-Driven Hyper-Local Early Warning System for Severe Weather Nowcasting
+// ====================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  METEOROLOGIST
+  AUTHORITY
+  OPERATOR
+  PUBLIC
+}
+
+enum SeverityLevel {
+  LOW
+  MODERATE
+  HIGH
+  SEVERE
+}
+
+enum AlertUrgency {
+  IMMEDIATE
+  EXPECTED
+  FUTURE
+  PAST
+  UNKNOWN
+}
+
+enum AlertCertainty {
+  OBSERVED
+  LIKELY
+  POSSIBLE
+  UNLIKELY
+  UNKNOWN
+}
+
+enum WeatherHazardType {
+  HEAVY_RAINFALL
+  CLOUDBURST
+  THUNDERSTORM
+  LIGHTNING
+  FLASH_FLOOD
+  GALE_WIND
+  HAILSTORM
+  CYCLONIC_GUST
+  EXTREME_CONVECTION
+}
+
+enum RegionType {
+  COUNTRY
+  STATE
+  DISTRICT
+  CITY
+  CUSTOM
+}
+
+enum DatasetSplitType {
+  TRAIN
+  VAL
+  TEST
+}
+
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  name         String
+  role         Role      @default(PUBLIC)
+  organization String?
+  apiKeyHash   String?
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@map("users")
+}
+
+model Region {
+  id                  String     @id @default(uuid())
+  code                String     @unique
+  name                String
+  type                RegionType @default(DISTRICT)
+  parentRegionId      String?
+  northLat            Float
+  southLat            Float
+  eastLng             Float
+  westLng             Float
+  centerLat           Float
+  centerLng           Float
+  boundaryPolygonJson Json?
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+
+  grids     WeatherGrid[]
+  locations Location[]
+
+  @@index([centerLat, centerLng])
+  @@index([type])
+  @@map("regions")
+}
+
+model Location {
+  id                  String   @id @default(uuid())
+  name                String
+  district            String
+  state               String
+  country             String   @default("India")
+  latitude            Float
+  longitude           Float
+  elevationMeters     Float?
+  regionId            String?
+  boundingPolygonJson Json?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  region       Region?              @relation(fields: [regionId], references: [id], onDelete: SetNull)
+  observations WeatherObservation[]
+  events       WeatherEvent[]
+
+  @@index([latitude, longitude])
+  @@index([district, state])
+  @@map("locations")
+}
+
+model WeatherGrid {
+  id                  String   @id @default(uuid())
+  gridCode            String   @unique
+  resolutionDegrees   Float    @default(0.01)
+  resolutionKm        Float    @default(1.1)
+  northLat            Float
+  southLat            Float
+  eastLng             Float
+  westLng             Float
+  centerLat           Float
+  centerLng           Float
+  regionId            String?
+  topographyType      String?
+  boundaryPolygonJson Json?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  region            Region?                    @relation(fields: [regionId], references: [id], onDelete: SetNull)
+  observations      WeatherObservation[]
+  weatherStates     GridWeatherState[]
+  historicalRecords HistoricalWeatherRecord[]
+  featureRecords    FeatureRecord[]
+  predictions       Prediction[]
+
+  @@index([centerLat, centerLng])
+  @@index([northLat, southLat, eastLng, westLng])
+  @@index([regionId])
+  @@map("weather_grids")
+}
+
+model WeatherObservation {
+  id                   String    @id @default(uuid())
+  provider             String    @default("open-meteo")
+  locationId           String?
+  gridId               String?
+  latitude             Float
+  longitude            Float
+  observedAt           DateTime
+  receivedAt           DateTime  @default(now())
+  qualityStatus        String    @default("VALID")
+  temperature          Float?
+  feelsLike            Float?
+  humidity             Float?
+  pressure             Float?
+  windSpeed            Float?
+  windDirection        Float?
+  windGust             Float?
+  rainfall             Float?
+  precipitationRate    Float?
+  visibility           Float?
+  cloudCover           Float?
+  weatherCondition     String?
+  weatherCode          Int?
+  radarReflectivityDbz Float?
+  cloudTopHeightKm     Float?
+  lightningStrikes     Int?      @default(0)
+  sourceStation        String?
+  rawPayloadJson       Json?
+  createdAt            DateTime  @default(now())
+
+  location Location?    @relation(fields: [locationId], references: [id], onDelete: SetNull)
+  grid     WeatherGrid? @relation(fields: [gridId], references: [id], onDelete: SetNull)
+
+  @@index([latitude, longitude, observedAt])
+  @@index([provider, locationId, observedAt])
+  @@index([gridId, observedAt])
+  @@index([observedAt])
+  @@map("weather_observations")
+}
+
+model GridWeatherState {
+  id                    String   @id @default(uuid())
+  gridId                String
+  timestamp             DateTime
+  temperature           Float?
+  feelsLike             Float?
+  humidity              Float?
+  pressure              Float?
+  windSpeed             Float?
+  windDirection         Float?
+  windGust              Float?
+  rainfall              Float?
+  precipitationRate     Float?
+  visibility            Float?
+  cloudCover            Float?
+  weatherCondition      String?
+  weatherCode           Int?
+  dataQuality           String   @default("VALID")
+  dataFreshness         String   @default("FRESH")
+  freshnessSeconds      Int      @default(0)
+  sourceCount           Int      @default(1)
+  rawObservationIdsJson Json?
+  aggregationMethod     String   @default("NEAREST_VALID")
+  createdAt             DateTime @default(now())
+
+  grid WeatherGrid @relation(fields: [gridId], references: [id], onDelete: Cascade)
+
+  @@index([gridId, timestamp])
+  @@index([timestamp])
+  @@map("grid_weather_states")
+}
+
+// ====================================================================
+// Phase 4: ML Dataset & Feature Store Models
+// ====================================================================
+
+model Dataset {
+  id                        String   @id @default(uuid())
+  name                      String   @unique
+  description               String
+  source                    String   @default("Open-Meteo Historical Archive / ERA5")
+  temporalResolutionMinutes Int      @default(60)
+  spatialResolutionDegrees  Float    @default(0.01)
+  createdAt                 DateTime @default(now())
+  updatedAt                 DateTime @updatedAt
+
+  versions DatasetVersion[]
+
+  @@map("datasets")
+}
+
+model DatasetVersion {
+  id                 String   @id @default(uuid())
+  datasetId          String
+  versionTag         String
+  recordCount        Int      @default(0)
+  trainCount         Int      @default(0)
+  valCount           Int      @default(0)
+  testCount          Int      @default(0)
+  startDate          DateTime
+  endDate            DateTime
+  qualitySummaryJson Json?
+  metadataJson       Json?
+  createdAt          DateTime @default(now())
+
+  dataset           Dataset                   @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  historicalRecords HistoricalWeatherRecord[]
+  featureRecords    FeatureRecord[]
+
+  @@unique([datasetId, versionTag])
+  @@map("dataset_versions")
+}
+
+model HistoricalWeatherRecord {
+  id                String   @id @default(uuid())
+  datasetVersionId  String
+  gridId            String
+  latitude          Float
+  longitude         Float
+  observedAt        DateTime
+  temperature       Float?
+  feelsLike         Float?
+  humidity          Float?
+  pressure          Float?
+  windSpeed         Float?
+  windDirection     Float?
+  windGust          Float?
+  rainfall          Float?
+  precipitationRate Float?
+  visibility        Float?
+  cloudCover        Float?
+  weatherCondition  String?
+  weatherCode       Int?
+  qualityFlag       String   @default("VALID")
+  imputationFlag    String   @default("OBSERVED")
+  rawPayloadJson    Json?
+  createdAt         DateTime @default(now())
+
+  version DatasetVersion @relation(fields: [datasetVersionId], references: [id], onDelete: Cascade)
+  grid    WeatherGrid    @relation(fields: [gridId], references: [id], onDelete: Cascade)
+
+  @@index([gridId, observedAt])
+  @@index([datasetVersionId, observedAt])
+  @@map("historical_weather_records")
+}
+
+model FeatureRecord {
+  id                    String           @id @default(uuid())
+  datasetVersionId      String
+  gridId                String
+  timestamp             DateTime
+  splitType             DatasetSplitType @default(TRAIN)
+  featuresJson          Json
+  targetRain15m         Float?
+  targetRain30m         Float?
+  targetRain60m         Float?
+  targetConvectiveEvent String           @default("NONE")
+  createdAt             DateTime         @default(now())
+
+  version DatasetVersion @relation(fields: [datasetVersionId], references: [id], onDelete: Cascade)
+  grid    WeatherGrid    @relation(fields: [gridId], references: [id], onDelete: Cascade)
+
+  @@index([gridId, timestamp])
+  @@index([datasetVersionId, splitType])
+  @@map("feature_records")
+}
+
+model ModelRun {
+  id              String    @id @default(uuid())
+  modelName       String
+  version         String
+  triggerType     String    @default("SCHEDULED")
+  executionTimeMs Int?
+  status          String    @default("COMPLETED")
+  metricsJson     Json?
+  startedAt       DateTime  @default(now())
+  completedAt     DateTime?
+
+  predictions Prediction[]
+
+  @@map("model_runs")
+}
+
+model Prediction {
+  id                    String            @id @default(uuid())
+  modelRunId            String
+  targetGridId          String
+  generatedAt           DateTime          @default(now())
+  forecastTime          DateTime
+  stepMinutes           Int
+  convectiveRiskPct     Float?
+  rainProbabilityPct    Float?
+  predictedRainRateMmH  Float?
+  severityLevel         SeverityLevel?
+  confidenceScore       Float?
+  stormMotionVectorJson Json?
+
+  modelRun ModelRun    @relation(fields: [modelRunId], references: [id], onDelete: Cascade)
+  grid     WeatherGrid @relation(fields: [targetGridId], references: [id], onDelete: Cascade)
+
+  @@index([targetGridId, forecastTime])
+  @@index([modelRunId])
+  @@map("predictions")
+}
+
+model WeatherAlert {
+  id                  String            @id @default(uuid())
+  identifier          String            @unique
+  sender              String
+  sentAt              DateTime          @default(now())
+  status              String            @default("ACTUAL")
+  msgType             String            @default("ALERT")
+  scope               String            @default("PUBLIC")
+  hazardType          WeatherHazardType
+  severity            SeverityLevel
+  urgency             AlertUrgency
+  certainty           AlertCertainty
+  headline            String
+  description         String
+  instruction         String?
+  effectiveAt         DateTime
+  expiresAt           DateTime
+  affectedPolygonJson Json?
+  issuedBy            String
+  verified            Boolean           @default(false)
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  @@index([severity, effectiveAt, expiresAt])
+  @@map("weather_alerts")
+}
+
+model WeatherEvent {
+  id                   String            @id @default(uuid())
+  eventType            WeatherHazardType
+  locationId           String
+  startTime            DateTime
+  endTime              DateTime?
+  peakSeverity         SeverityLevel
+  observedRainfallMm   Float?
+  peakWindSpeedKmh     Float?
+  leadTimeMinutes      Int?
+  postIncidentAnalysis String?
+  createdAt            DateTime          @default(now())
+
+  location Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+
+  @@index([locationId, startTime])
+  @@map("weather_events")
+}
+
+// ====================================================================
+// Phase 7: Multi-Source Weather Intelligence & Data Fusion Models
+// ====================================================================
+
+model WeatherSourceRecord {
+  id                    String   @id @default(uuid())
+  sourceId              String   @unique
+  sourceName            String
+  sourceType            String   @default("OBSERVATION")
+  provider              String
+  version               String   @default("1.0")
+  coverage              String   @default("National / Regional")
+  spatialResolution     String   @default("Point / 1.1km")
+  temporalResolution    String   @default("10-60 min")
+  status                String   @default("ACTIVE")
+  lastSuccessfulFetch   DateTime?
+  attribution           String
+  configurationStatus   String   @default("CONFIGURED")
+  updateIntervalMinutes Int      @default(15)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([sourceType, status])
+  @@map("weather_sources")
+}
+
+model RadarObservationRecord {
+  id            String   @id @default(uuid())
+  sourceId      String
+  gridId        String
+  timestamp     DateTime
+  productType   String   @default("REFLECTIVITY_DBZ")
+  value         Float
+  resolutionKm  Float    @default(1.1)
+  coverage      String   @default("REGIONAL")
+  quality       String   @default("VALID")
+  createdAt     DateTime @default(now())
+
+  @@index([gridId, timestamp])
+  @@index([timestamp])
+  @@map("radar_observations")
+}
+
+model SatelliteObservationRecord {
+  id           String   @id @default(uuid())
+  sourceId     String
+  gridId       String
+  timestamp    DateTime
+  productType  String   @default("CLOUD_COVER_PCT")
+  value        Float
+  resolutionKm Float    @default(4.0)
+  quality      String   @default("VALID")
+  createdAt    DateTime @default(now())
+
+  @@index([gridId, timestamp])
+  @@map("satellite_observations")
+}
+
+model LightningObservationRecord {
+  id                   String   @id @default(uuid())
+  sourceId             String
+  gridId               String
+  timestamp            DateTime
+  latitude             Float
+  longitude            Float
+  strikeCount          Int      @default(1)
+  spatialDensityPerKm2 Float    @default(0.1)
+  peakCurrentKa        Float?
+  quality              String   @default("VALID")
+  createdAt            DateTime @default(now())
+
+  @@index([gridId, timestamp])
+  @@map("lightning_observations")
+}
+
+model NWPObservationRecord {
+  id                String   @id @default(uuid())
+  sourceId          String
+  gridId            String
+  modelName         String   @default("ECMWF-IFS")
+  forecastTime      DateTime
+  temperature       Float?
+  pressure          Float?
+  humidity          Float?
+  windSpeed         Float?
+  precipitationRate Float?
+  quality           String   @default("VALID")
+  createdAt         DateTime @default(now())
+
+  @@index([gridId, forecastTime])
+  @@map("nwp_observations")
+}
+
+model FusedGridStateRecord {
+  id                   String   @id @default(uuid())
+  gridId               String
+  timestamp            DateTime
+  temperature          Float?
+  humidity             Float?
+  pressure             Float?
+  windSpeed            Float?
+  windGust             Float?
+  windDirection        Float?
+  rainfall             Float?
+  precipitationRate    Float?
+  radarReflectivityDbz Float?
+  satelliteCloudCover  Float?
+  lightningDensity     Float?
+  dataQuality          String   @default("VALID")
+  freshnessSeconds     Int      @default(0)
+  sourceMetadataJson   Json?
+  fusionVersion        String   @default("fusion-v1.0")
+  createdAt            DateTime @default(now())
+
+  lineages FusionLineageRecord[]
+
+  @@index([gridId, timestamp])
+  @@map("fused_grid_states")
+}
+
+model FusionLineageRecord {
+  id                       String   @id @default(uuid())
+  fusedStateId             String
+  variableName             String
+  selectedSourceId         String
+  contributingSourcesJson  Json?
+  conflictResolutionReason String?
+  timestamp                DateTime @default(now())
+
+  fusedState FusedGridStateRecord @relation(fields: [fusedStateId], references: [id], onDelete: Cascade)
+
+  @@index([fusedStateId, variableName])
+  @@map("fusion_lineages")
+}
+
+// ====================================================================
+// Phase 8: Risk Intelligence & Early Warning Models
+// ====================================================================
+
+model RiskAssessmentRecord {
+  id               String   @id @default(uuid())
+  gridId           String
+  hazardType       String   @default("HEAVY_RAIN")
+  riskLevel        String   @default("NORMAL")
+  riskScore        Float    @default(0.0)
+  modelProbability Float    @default(0.0)
+  uncertaintyScore Float    @default(0.0)
+  validFrom        DateTime
+  validUntil       DateTime
+  generatedAt      DateTime @default(now())
+  status           String   @default("ACTIVE")
+  dataQuality      String   @default("VALID")
+  modelVersion     String   @default("spatiotemporal-convlstm-v1")
+  fusionVersion    String   @default("fusion-v1.0")
+  summaryText      String?
+
+  explanations RiskExplanationRecord[]
+
+  @@index([gridId, hazardType, validUntil])
+  @@index([riskLevel, generatedAt])
+  @@map("risk_assessments")
+}
+
+model RiskExplanationRecord {
+  id                   String   @id @default(uuid())
+  assessmentId         String
+  factorName           String
+  factorValue          Float
+  relativeContribution Float
+  direction            String   @default("NEUTRAL")
+  explanationText      String
+
+  assessment RiskAssessmentRecord @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+
+  @@index([assessmentId])
+  @@map("risk_explanations")
+}
+
+model RiskHotspotRecord {
+  id                   String   @id @default(uuid())
+  hazardType           String
+  riskLevel            String
+  peakRiskScore        Float
+  affectedGridCount    Int      @default(1)
+  centroidLat          Float
+  centroidLon          Float
+  boundsJson           Json?
+  gridIdsJson          Json?
+  estimatedSpeedKmh    Float?   @default(0.0)
+  estimatedDirectionDeg Float?  @default(0.0)
+  validUntil           DateTime
+  createdAt            DateTime @default(now())
+
+  @@index([hazardType, riskLevel, validUntil])
+  @@map("risk_hotspots")
+}
+
+model RiskStateTransitionRecord {
+  id               String   @id @default(uuid())
+  gridId           String
+  hazardType       String
+  fromLevel        String
+  toLevel          String
+  riskScore        Float
+  transitionReason String
+  timestamp        DateTime @default(now())
+
+  @@index([gridId, hazardType, timestamp])
+  @@map("risk_state_transitions")
+}
+
+model RiskVerificationRecord {
+  id                 String   @id @default(uuid())
+  assessmentId       String
+  gridId             String
+  hazardType         String
+  predictedRiskScore Float
+  predictedRiskLevel String
+  observedMetric     Float
+  outcomeClass       String   @default("TRUE_POSITIVE")
+  verifiedAt         DateTime @default(now())
+
+  @@index([gridId, hazardType, verifiedAt])
+  @@map("risk_verifications")
+}
+
+// ====================================================================
+// Phase 9: Early-Warning Delivery & Notification Infrastructure
+// ====================================================================
+
+model AlertEventRecord {
+  id                  String   @id @default(uuid())
+  alertId             String   @unique
+  hazardType          String
+  gridId              String
+  gridCode            String
+  riskLevel           String
+  riskScore           Float
+  probability         Float
+  uncertaintyScore    Float
+  title               String
+  description         String
+  origin              String   @default("AI_MODEL_ASSESSMENT")
+  validFrom           DateTime
+  validUntil          DateTime
+  modelVersion        String   @default("spatiotemporal-convlstm-v1")
+  fusionVersion       String   @default("fusion-v1.0")
+  status              String   @default("ACTIVE")
+  explanationSummary  String?
+  contributingSourcesJson Json?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  notifications NotificationRecord[]
+
+  @@index([gridId, status, validUntil])
+  @@index([hazardType, riskLevel])
+  @@map("alert_events")
+}
+
+model UserSubscriptionRecord {
+  id                        String   @id @default(uuid())
+  subscriptionId            String   @unique
+  userId                    String
+  userName                  String?
+  channel                   String   @default("IN_APP")
+  endpoint                  String
+  latitude                  Float?
+  longitude                 Float?
+  radiusKm                  Float?   @default(5.0)
+  gridId                    String?
+  hazardPreferencesJson     Json
+  minimumRiskLevel          String   @default("HIGH")
+  quietHoursEnabled         Boolean  @default(false)
+  quietHoursStart           String?
+  quietHoursEnd             String?
+  bypassQuietHoursForSevere Boolean  @default(true)
+  enabled                   Boolean  @default(true)
+  createdAt                 DateTime @default(now())
+  updatedAt                 DateTime @updatedAt
+
+  notifications NotificationRecord[]
+
+  @@index([userId, enabled])
+  @@index([gridId])
+  @@map("user_subscriptions")
+}
+
+model NotificationRecord {
+  id               String    @id @default(uuid())
+  notificationId   String    @unique
+  alertId          String
+  subscriptionId   String
+  userId           String
+  channel          String
+  title            String
+  body             String
+  hazardType       String
+  riskLevel        String
+  gridId           String
+  origin           String    @default("AI_MODEL_ASSESSMENT")
+  status           String    @default("QUEUED")
+  skipReason       String?
+  retryCount       Int       @default(0)
+  maxRetries       Int       @default(3)
+  nextAttemptAt    DateTime?
+  deliveredAt      DateTime?
+  readAt           DateTime?
+  failureReason    String?
+  deduplicationKey String    @unique
+  disclaimer       String
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  alert        AlertEventRecord       @relation(fields: [alertId], references: [alertId], onDelete: Cascade)
+  subscription UserSubscriptionRecord @relation(fields: [subscriptionId], references: [subscriptionId], onDelete: Cascade)
+  deliveries   NotificationDeliveryRecord[]
+
+  @@index([userId, status, createdAt])
+  @@index([alertId, channel])
+  @@map("notifications")
+}
+
+model NotificationDeliveryRecord {
+  id                String   @id @default(uuid())
+  receiptId         String   @unique
+  notificationId    String
+  channel           String
+  providerStatus    String
+  providerMessageId String?
+  attemptNumber     Int      @default(1)
+  latencyMs         Int      @default(0)
+  timestamp         DateTime @default(now())
+
+  notification NotificationRecord @relation(fields: [notificationId], references: [notificationId], onDelete: Cascade)
+
+  @@index([notificationId, timestamp])
+  @@map("notification_deliveries")
+}
+
+model NotificationAuditLogRecord {
+  id        String   @id @default(uuid())
+  timestamp DateTime @default(now())
+  actor     String   @default("SYSTEM")
+  event     String
+  reason    String
+  relatedId String?
+  oldState  String?
+  newState  String?
+
+  @@index([event, timestamp])
+  @@map("notification_audit_logs")
+}

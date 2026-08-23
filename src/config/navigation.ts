@@ -1,0 +1,206 @@
+import {
+  LayoutDashboard,
+  Map,
+  Zap,
+  AlertTriangle,
+  BarChart3,
+  History,
+  ShieldAlert,
+  Settings,
+  Presentation,
+  Play,
+  Activity,
+  Cpu,
+  Database,
+  Sliders,
+  Award,
+  Sparkles,
+  HeartHandshake,
+  FileWarning,
+  Layers,
+  HelpCircle,
+  ShieldCheck,
+  CheckCircle2,
+  LucideIcon,
+} from 'lucide-react';
+
+export interface NavItem {
+  title: string;
+  path: string;
+  icon: LucideIcon;
+  badge?: string;
+  description: string;
+}
+
+export const MAIN_NAVIGATION: NavItem[] = [
+  {
+    title: 'Dashboard',
+    path: '/',
+    icon: LayoutDashboard,
+    description: 'Mission Control Overview & Telemetry',
+  },
+  {
+    title: 'SIH Judge Deck',
+    path: '/sih/judge',
+    icon: Award,
+    badge: 'SIH',
+    description: 'Master SIH Judge Mission Control',
+  },
+  {
+    title: 'SIH Guided Demo',
+    path: '/sih/demo',
+    icon: Play,
+    badge: '12-STEP',
+    description: 'Interactive Step-by-Step Demonstration',
+  },
+  {
+    title: '60s Pitch Deck',
+    path: '/sih/pitch',
+    icon: Sparkles,
+    description: 'Concise 60-Second Executive Pitch',
+  },
+  {
+    title: 'Technical Q&A',
+    path: '/sih/qa',
+    icon: HelpCircle,
+    description: 'Defense Terminal for 13 Judge Inquiries',
+  },
+  {
+    title: 'System Pre-Check',
+    path: '/sih/check',
+    icon: CheckCircle2,
+    badge: 'PASS',
+    description: '13-Point Pre-Presentation Diagnostic',
+  },
+  {
+    title: 'Model Evidence',
+    path: '/sih/evidence/model',
+    icon: Cpu,
+    description: 'Empirical Benchmark & Metrics Proof',
+  },
+  {
+    title: 'System Evidence',
+    path: '/sih/evidence/system',
+    icon: Activity,
+    description: 'Health Probes & End-to-End Lineage',
+  },
+  {
+    title: 'Security Evidence',
+    path: '/sih/evidence/security',
+    icon: ShieldCheck,
+    description: 'Credential Isolation & Location Privacy',
+  },
+  {
+    title: 'Testing Evidence',
+    path: '/sih/evidence/testing',
+    icon: Layers,
+    description: '65/65 Passing Automated Tests',
+  },
+  {
+    title: 'Scalability',
+    path: '/sih/scalability',
+    icon: Database,
+    description: 'Spatial Partitioning & Async Worker Queue',
+  },
+  {
+    title: 'Live Map',
+    path: '/map',
+    icon: Map,
+    badge: 'GIS',
+    description: 'Doppler Radar & Satellite GIS Layers',
+  },
+  {
+    title: 'Nowcast',
+    path: '/nowcast',
+    icon: Zap,
+    badge: 'AI',
+    description: '0-6h Convective AI Prediction Engine',
+  },
+  {
+    title: 'Alerts',
+    path: '/alerts',
+    icon: AlertTriangle,
+    description: 'Common Alerting Protocol (CAP) Center',
+  },
+  {
+    title: 'Demo Control Center',
+    path: '/demo/control-center',
+    icon: Sliders,
+    badge: 'DEMO',
+    description: 'Scenario Replay & Master Control',
+  },
+  {
+    title: 'SIH Presentation',
+    path: '/presentation',
+    icon: Presentation,
+    description: 'Judge Presentation Slides',
+  },
+  {
+    title: 'Innovations',
+    path: '/demo/innovation',
+    icon: Sparkles,
+    description: 'Core Meteorological Innovations',
+  },
+  {
+    title: 'Societal Impact',
+    path: '/demo/impact',
+    icon: HeartHandshake,
+    description: 'Decision Support & City Resilience',
+  },
+  {
+    title: 'System Architecture',
+    path: '/architecture',
+    icon: Layers,
+    description: 'Pipeline & Verified Tech Stack',
+  },
+  {
+    title: 'Limitations',
+    path: '/limitations',
+    icon: FileWarning,
+    description: 'Boundary Conditions & Safety Guardrails',
+  },
+  {
+    title: 'Model Monitoring',
+    path: '/admin/models',
+    icon: Cpu,
+    badge: 'MPS',
+    description: 'Empirical Model Benchmark & Drift',
+  },
+  {
+    title: 'Data Quality',
+    path: '/admin/data-quality',
+    icon: Database,
+    description: 'Sensor Freshness & Quality Gates',
+  },
+  {
+    title: 'System Health',
+    path: '/admin/system-health',
+    icon: Activity,
+    description: 'Microservice Probes & Telemetry',
+  },
+  {
+    title: 'Analytics',
+    path: '/analytics',
+    icon: BarChart3,
+    description: 'Meteorological Validation & Trends',
+  },
+  {
+    title: 'History',
+    path: '/history',
+    icon: History,
+    description: 'Severe Weather Event Archive',
+  },
+  {
+    title: 'Authority Center',
+    path: '/authority',
+    icon: ShieldAlert,
+    badge: 'EOC',
+    description: 'Disaster Management Command Deck',
+  },
+  {
+    title: 'Settings',
+    path: '/settings',
+    icon: Settings,
+    description: 'Preferences & System Diagnostics',
+  },
+];

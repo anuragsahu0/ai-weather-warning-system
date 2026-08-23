@@ -1,0 +1,48 @@
+{
+  "modelId": "mod-spatiotemporal-convlstm-v1",
+  "modelVersion": "spatiotemporal-convlstm-v1",
+  "modelType": "ConvLSTM",
+  "datasetVersion": "error404-monsoon-delhi-2024-v1.0",
+  "featureScalerVersion": "spatiotemporal-scaler-v1.0",
+  "inputSequenceLength": 6,
+  "spatialNeighborhoodSize": "3x3 (1.1km grid)",
+  "horizons": [
+    10,
+    20,
+    30,
+    60
+  ],
+  "channels": [
+    "temperature",
+    "humidity",
+    "pressure",
+    "windSpeed",
+    "windDirection",
+    "windGust",
+    "rainfallRate",
+    "pressureTendencyHpaPerHr"
+  ],
+  "trainingSamplesCount": 248,
+  "validationSamplesCount": 53,
+  "testSamplesCount": 54,
+  "trainingPeriod": {
+    "start": "2024-07-01T00:00:00Z",
+    "end": "2024-07-11T11:00:00Z"
+  },
+  "testPeriod": {
+    "start": "2024-07-13T18:00:00Z",
+    "end": "2024-07-15T23:00:00Z"
+  },
+  "metrics": {
+    "rainfallMae": 6.05,
+    "rainfallRmse": 15.54,
+    "precision": 0.75,
+    "recall": 0.375,
+    "f1Score": 0.5,
+    "prAuc": 0.599,
+    "brierScore": 0.113,
+    "decisionThreshold": 0.2
+  },
+  "createdAt": "2026-08-22T17:54:38.355177+00:00",
+  "status": "ACTIVE"
+}

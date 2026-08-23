@@ -1,0 +1,18 @@
+# ====================================================================
+# ERROR 404 — Machine Learning Service Requirements (Phase 1)
+# ====================================================================
+
+# Web API Framework
+fastapi>=0.115.0
+uvicorn[standard]>=0.32.0
+pydantic>=2.9.0
+
+# Scientific Computation & Data Handling (Prepared for Phase 7 ML)
+numpy>=1.26.0
+pandas>=2.2.0
+scipy>=1.14.0
+
+# Future Deep Learning Frameworks (Uncomment when deploying trained model weights in Phase 7)
+# torch>=2.5.0
+# torchvision>=0.20.0
+# scikit-learn>=1.5.0
