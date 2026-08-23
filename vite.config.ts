@@ -40,22 +40,27 @@ function resolveJsExtensionsPlugin(): Plugin {
 export default defineConfig({
   plugins: [resolveJsExtensionsPlugin(), react()],
   resolve: {
-    dedupe: ['react', 'react-dom', 'react-router-dom', '@tanstack/react-query'],
+    dedupe: ['react', 'react-dom'],
     alias: {
       '@': path.resolve(__dirname, './src'),
       '@shared': path.resolve(__dirname, './shared'),
-      'react': path.resolve(__dirname, 'node_modules/react'),
-      'react-dom': path.resolve(__dirname, 'node_modules/react-dom'),
     },
     extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json'],
-  },
-  optimizeDeps: {
-    include: ['react', 'react-dom', 'react-router-dom', '@tanstack/react-query', 'lucide-react', 'clsx', 'tailwind-merge'],
   },
   server: {
     host: true,
     port: 3000,
     allowedHosts: true,
+    proxy: {
+      '/api': {
+        target: process.env.VITE_API_TARGET || 'http://localhost:5001',
+        changeOrigin: true,
+      },
+    },
+  },
+  preview: {
+    host: true,
+    port: 3000,
     proxy: {
       '/api': {
         target: process.env.VITE_API_TARGET || 'http://localhost:5001',
