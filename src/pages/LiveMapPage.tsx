@@ -155,9 +155,9 @@ export function LiveMapPage() {
 
       {/* 6. Attribution Footer */}
       <AttributionFooter
-        providerName={weather?.attribution.providerName || 'Open-Meteo Weather API'}
-        sourceUrl={weather?.attribution.sourceUrl || 'https://open-meteo.com/'}
-        license={weather?.attribution.license || 'WMO & National Weather Services Open Meteorological Data'}
+        providerName={weather?.attribution?.providerName || 'Open-Meteo Weather API'}
+        sourceUrl={weather?.attribution?.sourceUrl || 'https://open-meteo.com/'}
+        license={weather?.attribution?.license || 'WMO & National Weather Services Open Meteorological Data'}
       />
     </div>
   );

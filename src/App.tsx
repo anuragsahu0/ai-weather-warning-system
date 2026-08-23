@@ -4,6 +4,7 @@ import { ThemeProvider } from './context/ThemeContext.js';
 import { SystemStatusProvider } from './context/SystemStatusContext.js';
 import { LocationProvider } from './context/LocationContext.js';
 import { AppLayout } from './components/layout/AppLayout.js';
+import { ErrorBoundary } from './components/feedback/ErrorBoundary.js';
 
 import { DashboardPage } from './pages/DashboardPage.js';
 import { LiveMapPage } from './pages/LiveMapPage.js';
@@ -50,56 +51,58 @@ const queryClient = new QueryClient({
 
 export function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <SystemStatusProvider>
-          <LocationProvider>
-            <BrowserRouter>
-              <Routes>
-                <Route element={<AppLayout />}>
-                  <Route path="/" element={<DashboardPage />} />
-                  <Route path="/map" element={<LiveMapPage />} />
-                  <Route path="/nowcast" element={<NowcastPage />} />
-                  <Route path="/alerts" element={<AlertsPage />} />
-                  <Route path="/presentation" element={<PresentationPage />} />
-                  <Route path="/demo" element={<DemoPage />} />
-                  <Route path="/demo/control-center" element={<DemoControlCenterPage />} />
-                  <Route path="/demo/judge" element={<JudgeModePage />} />
-                  <Route path="/demo/innovation" element={<InnovationPage />} />
-                  <Route path="/demo/impact" element={<ImpactPage />} />
-                  <Route path="/limitations" element={<LimitationsPage />} />
-                  <Route path="/architecture" element={<ArchitecturePage />} />
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider>
+          <SystemStatusProvider>
+            <LocationProvider>
+              <BrowserRouter>
+                <Routes>
+                  <Route element={<AppLayout />}>
+                    <Route path="/" element={<DashboardPage />} />
+                    <Route path="/map" element={<LiveMapPage />} />
+                    <Route path="/nowcast" element={<NowcastPage />} />
+                    <Route path="/alerts" element={<AlertsPage />} />
+                    <Route path="/presentation" element={<PresentationPage />} />
+                    <Route path="/demo" element={<DemoPage />} />
+                    <Route path="/demo/control-center" element={<DemoControlCenterPage />} />
+                    <Route path="/demo/judge" element={<JudgeModePage />} />
+                    <Route path="/demo/innovation" element={<InnovationPage />} />
+                    <Route path="/demo/impact" element={<ImpactPage />} />
+                    <Route path="/limitations" element={<LimitationsPage />} />
+                    <Route path="/architecture" element={<ArchitecturePage />} />
 
-                  {/* Phase 12 SIH Presentation, Demo Simulation & Evidence Pack Routes */}
-                  <Route path="/sih/judge" element={<SihJudgeDashboardPage />} />
-                  <Route path="/sih/demo" element={<SihGuidedDemoPage />} />
-                  <Route path="/sih/pitch" element={<SihPitchPage />} />
-                  <Route path="/sih/qa" element={<SihQAPage />} />
-                  <Route path="/sih/scalability" element={<SihScalabilityPage />} />
-                  <Route path="/sih/check" element={<SihCheckPage />} />
-                  <Route path="/sih/impact" element={<ImpactPage />} />
-                  <Route path="/sih/limitations" element={<LimitationsPage />} />
-                  <Route path="/sih/evidence/model" element={<SihModelEvidencePage />} />
-                  <Route path="/sih/evidence/system" element={<SihSystemEvidencePage />} />
-                  <Route path="/sih/evidence/security" element={<SihSecurityEvidencePage />} />
-                  <Route path="/sih/evidence/testing" element={<SihTestingEvidencePage />} />
+                    {/* Phase 12 SIH Presentation, Demo Simulation & Evidence Pack Routes */}
+                    <Route path="/sih/judge" element={<SihJudgeDashboardPage />} />
+                    <Route path="/sih/demo" element={<SihGuidedDemoPage />} />
+                    <Route path="/sih/pitch" element={<SihPitchPage />} />
+                    <Route path="/sih/qa" element={<SihQAPage />} />
+                    <Route path="/sih/scalability" element={<SihScalabilityPage />} />
+                    <Route path="/sih/check" element={<SihCheckPage />} />
+                    <Route path="/sih/impact" element={<ImpactPage />} />
+                    <Route path="/sih/limitations" element={<LimitationsPage />} />
+                    <Route path="/sih/evidence/model" element={<SihModelEvidencePage />} />
+                    <Route path="/sih/evidence/system" element={<SihSystemEvidencePage />} />
+                    <Route path="/sih/evidence/security" element={<SihSecurityEvidencePage />} />
+                    <Route path="/sih/evidence/testing" element={<SihTestingEvidencePage />} />
 
-                  <Route path="/admin/system-health" element={<SystemHealthPage />} />
-                  <Route path="/admin/models" element={<ModelMonitoringPage />} />
-                  <Route path="/admin/data-quality" element={<DataQualityPage />} />
-                  <Route path="/analytics" element={<AnalyticsPage />} />
-                  <Route path="/history" element={<HistoryPage />} />
-                  <Route path="/authority" element={<AuthorityPage />} />
-                  <Route path="/settings" element={<SettingsPage />} />
-                </Route>
-                <Route path="/404" element={<NotFoundPage />} />
-                <Route path="*" element={<NotFoundPage />} />
-              </Routes>
-            </BrowserRouter>
-          </LocationProvider>
-        </SystemStatusProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
+                    <Route path="/admin/system-health" element={<SystemHealthPage />} />
+                    <Route path="/admin/models" element={<ModelMonitoringPage />} />
+                    <Route path="/admin/data-quality" element={<DataQualityPage />} />
+                    <Route path="/analytics" element={<AnalyticsPage />} />
+                    <Route path="/history" element={<HistoryPage />} />
+                    <Route path="/authority" element={<AuthorityPage />} />
+                    <Route path="/settings" element={<SettingsPage />} />
+                  </Route>
+                  <Route path="/404" element={<NotFoundPage />} />
+                  <Route path="*" element={<NotFoundPage />} />
+                </Routes>
+              </BrowserRouter>
+            </LocationProvider>
+          </SystemStatusProvider>
+        </ThemeProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 

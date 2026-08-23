@@ -3,11 +3,11 @@ import { useSystemHealth } from '../../hooks/useMonitoring.js';
 export function GlobalStatusBar() {
   const { health } = useSystemHealth();
 
-  const dataStatus = health?.services.weatherIngestion.status || 'HEALTHY';
-  const modelStatus = health?.services.nowcastingEngine.status || 'HEALTHY';
-  const fusionStatus = health?.services.fusionEngine.status || 'HEALTHY';
-  const riskStatus = health?.services.riskEngine.status || 'HEALTHY';
-  const alertStatus = health?.services.notificationWorker.status || 'HEALTHY';
+  const dataStatus = health?.services?.weatherIngestion?.status || 'HEALTHY';
+  const modelStatus = health?.services?.nowcastingEngine?.status || 'HEALTHY';
+  const fusionStatus = health?.services?.fusionEngine?.status || 'HEALTHY';
+  const riskStatus = health?.services?.riskEngine?.status || 'HEALTHY';
+  const alertStatus = health?.services?.notificationWorker?.status || 'HEALTHY';
 
   const getDotColor = (status: string) => {
     if (status === 'HEALTHY') return 'bg-emerald-500';
